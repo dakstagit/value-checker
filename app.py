@@ -33,3 +33,7 @@ Please consider:
         )
         result = response['choices'][0]['message']['content']
     return render_template('index.html', result=result)
+    
+# REQUIRED for Render to work
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=10000)
