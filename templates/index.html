@@ -5,15 +5,13 @@
   <title>Value for Money Checker</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f4f6f8;
-      color: #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6f8;
+  color: #333;
+  margin: 0;
+  padding: 40px 0;
+}
+
     .container {
       background: white;
       padding: 40px;
@@ -67,6 +65,15 @@
   line-height: 1.6;
   font-size: 16px;
 }
+.result p {
+  margin: 10px 0;
+}
+.result p::before {
+  content: "• ";
+  color: #0052cc;
+  font-weight: bold;
+}
+
 .recommendation {
   margin-top: 20px;
   padding: 16px;
