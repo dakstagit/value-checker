@@ -108,20 +108,29 @@
     {% if result %}
       <div class="result">
   <strong>Analysis:</strong><br>
-  {{ result|safe }}
-
-  {% if 'rating' in result|lower %}
-    {% if '5' in result or 'excellent' in result|lower %}
-      <div class="recommendation good">✅ Final Recommendation: BUY (5/5 – Excellent Value)</div>
-    {% elif '4' in result %}
-      <div class="recommendation good">✅ Final Recommendation: BUY (4/5 – Good Value)</div>
-    {% elif '3' in result %}
-      <div class="recommendation average">🤔 Final Recommendation: MAYBE (3/5 – Average Value)</div>
-    {% else %}
-      <div class="recommendation poor">❌ Final Recommendation: DO NOT BUY (1–2/5 – Poor Value)</div>
+  {% set lines = result.splitlines() %}
+  {% for line in lines %}
+    {% if "Final Recommendation:" not in line %}
+      <p>{{ line }}</p>
     {% endif %}
-  {% endif %}
+  {% endfor %}
+
+  {% for line in lines %}
+    {% if "Final Recommendation:" in line %}
+      {% set verdict = line.lower() %}
+      {% if '5' in verdict or 'excellent' in verdict %}
+        <div class="recommendation good">{{ line }}</div>
+      {% elif '4' in verdict or 'good' in verdict %}
+        <div class="recommendation good">{{ line }}</div>
+      {% elif '3' in verdict or 'average' in verdict %}
+        <div class="recommendation average">{{ line }}</div>
+      {% else %}
+        <div class="recommendation poor">{{ line }}</div>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
 </div>
+
     {% endif %}
   </div>
 </body>
