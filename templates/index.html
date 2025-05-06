@@ -57,14 +57,39 @@
     button:hover {
       background-color: #003d99;
     }
-    .result {
-      margin-top: 30px;
-      background: #f9f9f9;
-      padding: 20px;
-      border-left: 4px solid #0052cc;
-      border-radius: 8px;
-      white-space: pre-wrap;
-    }
+   .result {
+  margin-top: 30px;
+  background: #f9f9f9;
+  padding: 20px;
+  border-left: 4px solid #0052cc;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 16px;
+}
+.recommendation {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 18px;
+}
+.recommendation.good {
+  background-color: #e6f4ea;
+  color: #1b5e20;
+  border: 1px solid #81c784;
+}
+.recommendation.average {
+  background-color: #fff8e1;
+  color: #bf360c;
+  border: 1px solid #ffb74d;
+}
+.recommendation.poor {
+  background-color: #ffebee;
+  color: #b71c1c;
+  border: 1px solid #e57373;
+}
   </style>
 </head>
 <body>
@@ -82,9 +107,21 @@
 
     {% if result %}
       <div class="result">
-        <strong>Analysis:</strong><br>
-        {{ result|safe }}
-      </div>
+  <strong>Analysis:</strong><br>
+  {{ result|safe }}
+
+  {% if 'rating' in result|lower %}
+    {% if '5' in result or 'excellent' in result|lower %}
+      <div class="recommendation good">✅ Final Recommendation: BUY (5/5 – Excellent Value)</div>
+    {% elif '4' in result %}
+      <div class="recommendation good">✅ Final Recommendation: BUY (4/5 – Good Value)</div>
+    {% elif '3' in result %}
+      <div class="recommendation average">🤔 Final Recommendation: MAYBE (3/5 – Average Value)</div>
+    {% else %}
+      <div class="recommendation poor">❌ Final Recommendation: DO NOT BUY (1–2/5 – Poor Value)</div>
+    {% endif %}
+  {% endif %}
+</div>
     {% endif %}
   </div>
 </body>
