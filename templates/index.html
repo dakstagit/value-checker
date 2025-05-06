@@ -3,21 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <title>Value for Money Checker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 24px;
+      text-align: center;
+      color: #222;
+    }
+    label {
+      display: block;
+      margin: 20px 0 5px;
+      font-weight: 600;
+    }
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      background-color: #0052cc;
+      color: white;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #003d99;
+    }
+    .result {
+      margin-top: 30px;
+      background: #f9f9f9;
+      padding: 20px;
+      border-left: 4px solid #0052cc;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
-  <h2>Perceived Value Checker (India)</h2>
-  <form method="POST">
-    <label>Product Name:</label><br>
-    <input type="text" name="product" required><br><br>
-    <label>Price in INR:</label><br>
-    <input type="number" name="price" required><br><br>
-    <button type="submit">Check Value</button>
-  </form>
-  {% if result %}
-    <hr>
-    <h3>Analysis:</h3>
-    <p>{{ result|safe }}</p>
-  {% endif %}
+  <div class="container">
+    <h2>Perceived Value for Money (India)</h2>
+    <form method="POST">
+      <label for="product">Product Name</label>
+      <input type="text" name="product" id="product" required>
+
+      <label for="price">Price (INR)</label>
+      <input type="number" name="price" id="price" required>
+
+      <button type="submit">Check Value</button>
+    </form>
+
+    {% if result %}
+      <div class="result">
+        <strong>Analysis:</strong><br>
+        {{ result|safe }}
+      </div>
+    {% endif %}
+  </div>
 </body>
 </html>
-
