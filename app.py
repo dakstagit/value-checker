@@ -17,14 +17,20 @@ def index():
         price = request.form['price']
         prompt = f"""
 Evaluate if the following product is value for money in India.
+
 Product: {product}
 Listed Price: ₹{price}
-Please consider:
+
+Please include:
 1. Global average price (converted to INR)
 2. Estimated production cost
 3. Comparable alternatives in Indian market
-4. Final verdict with a rating (e.g., Excellent / Good / Average / Poor Value)
+4. A clear final verdict with a numeric score (1–5), value description, and recommendation.
+
+Format your last line like this exactly:
+Final Recommendation: BUY (Score: 4/5 – Good Value)
 """
+
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
