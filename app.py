@@ -7,7 +7,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -25,15 +25,14 @@ Please consider:
 3. Comparable alternatives in Indian market
 4. Final verdict with a rating (e.g., Excellent / Good / Average / Poor Value)
 """
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
             max_tokens=500
         )
-        result = response['choices'][0]['message']['content']
+        result = response.choices[0].message.content
     return render_template('index.html', result=result)
-    
-# REQUIRED for Render to work
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
