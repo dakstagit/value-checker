@@ -4,44 +4,51 @@
   <meta charset="UTF-8">
   <title>Value for Money Checker</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f8;
-  color: #333;
-  margin: 0;
-  padding: 40px 0;
-}
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      color: #333;
+      margin: 0;
+      padding: 40px 20px;
+    }
 
     .container {
       background: white;
       padding: 40px;
       border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      max-width: 600px;
-      width: 100%;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      max-width: 700px;
+      margin: auto;
     }
+
     h2 {
-      margin-top: 0;
-      font-size: 24px;
       text-align: center;
-      color: #222;
+      font-size: 24px;
+      margin-top: 0;
     }
+
     label {
       display: block;
-      margin: 20px 0 5px;
+      margin-top: 20px;
       font-weight: 600;
     }
+
     input[type="text"],
     input[type="number"] {
       width: 100%;
       padding: 12px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      box-sizing: border-box;
       font-size: 16px;
+      margin-top: 8px;
     }
+
     button {
-      margin-top: 20px;
+      margin-top: 30px;
       width: 100%;
       background-color: #0052cc;
       color: white;
@@ -52,51 +59,50 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
+
     button:hover {
       background-color: #003d99;
     }
-   .result {
-  margin-top: 30px;
-  background: #f9f9f9;
-  padding: 20px;
-  border-left: 4px solid #0052cc;
-  border-radius: 8px;
-  white-space: pre-wrap;
-  line-height: 1.6;
-  font-size: 16px;
-}
-.result p {
-  margin: 10px 0;
-}
-.result p::before {
-  content: "• ";
-  color: #0052cc;
-  font-weight: bold;
-}
 
-.recommendation {
-  margin-top: 20px;
-  padding: 16px;
-  border-radius: 8px;
-  font-weight: bold;
-  text-align: center;
-  font-size: 18px;
-}
-.recommendation.good {
-  background-color: #e6f4ea;
-  color: #1b5e20;
-  border: 1px solid #81c784;
-}
-.recommendation.average {
-  background-color: #fff8e1;
-  color: #bf360c;
-  border: 1px solid #ffb74d;
-}
-.recommendation.poor {
-  background-color: #ffebee;
-  color: #b71c1c;
-  border: 1px solid #e57373;
-}
+    .result {
+      margin-top: 40px;
+      background: #f9f9f9;
+      padding: 25px;
+      border-left: 4px solid #0052cc;
+      border-radius: 8px;
+    }
+
+    .result p {
+      margin: 14px 0;
+      line-height: 1.6;
+    }
+
+    .recommendation {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .recommendation.good {
+      background-color: #e6f4ea;
+      color: #1b5e20;
+      border: 1px solid #81c784;
+    }
+
+    .recommendation.average {
+      background-color: #fff8e1;
+      color: #bf360c;
+      border: 1px solid #ffb74d;
+    }
+
+    .recommendation.poor {
+      background-color: #ffebee;
+      color: #b71c1c;
+      border: 1px solid #e57373;
+    }
   </style>
 </head>
 <body>
@@ -114,30 +120,29 @@
 
     {% if result %}
       <div class="result">
-  <strong>Analysis:</strong><br>
-  {% set lines = result.splitlines() %}
-  {% for line in lines %}
-    {% if "Final Recommendation:" not in line %}
-      <p>{{ line }}</p>
-    {% endif %}
-  {% endfor %}
+        <strong>Analysis:</strong>
+        {% set lines = result.splitlines() %}
+        {% for line in lines %}
+          {% if "Final Recommendation:" not in line and line.strip() != "" %}
+            <p>{{ line }}</p>
+          {% endif %}
+        {% endfor %}
 
-  {% for line in lines %}
-    {% if "Final Recommendation:" in line %}
-      {% set verdict = line.lower() %}
-      {% if '5' in verdict or 'excellent' in verdict %}
-        <div class="recommendation good">{{ line }}</div>
-      {% elif '4' in verdict or 'good' in verdict %}
-        <div class="recommendation good">{{ line }}</div>
-      {% elif '3' in verdict or 'average' in verdict %}
-        <div class="recommendation average">{{ line }}</div>
-      {% else %}
-        <div class="recommendation poor">{{ line }}</div>
-      {% endif %}
-    {% endif %}
-  {% endfor %}
-</div>
-
+        {% for line in lines %}
+          {% if "Final Recommendation:" in line %}
+            {% set verdict = line.lower() %}
+            {% if '5' in verdict or 'excellent' in verdict %}
+              <div class="recommendation good">{{ line }}</div>
+            {% elif '4' in verdict or 'good' in verdict %}
+              <div class="recommendation good">{{ line }}</div>
+            {% elif '3' in verdict or 'average' in verdict %}
+              <div class="recommendation average">{{ line }}</div>
+            {% else %}
+              <div class="recommendation poor">{{ line }}</div>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
     {% endif %}
   </div>
 </body>
