@@ -245,10 +245,11 @@
           <strong>Analysis:</strong>
           {% set lines = result.splitlines() %}
           {% for line in lines %}
-            {% if "Final Recommendation:" not in line and "Confidence Score:" not in line and line.strip() != "" %}
-              <p>{{ line }}</p>
-            {% endif %}
-          {% endfor %}
+  {% if not line.startswith("Final Recommendation:") and not line.startswith("Confidence Score:") and line.strip() != "" %}
+    <p>{{ line }}</p>
+  {% endif %}
+{% endfor %}
+
 
           {% for line in lines %}
             {% if "Confidence Score:" in line %}
