@@ -46,13 +46,13 @@ Please include:
 1. Global average price for this category (converted to {currency} if needed)
 2. Estimated production cost
 3. Similar alternatives available in the selected market
-4. A confidence score (out of 100) indicating how confident you are in this evaluation
-5. A clear final verdict with a numeric score (1–5), value description, and BUY/DO NOT BUY recommendation.
-
-Format your last two lines like this exactly:
+4. Provide a short paragraph summarizing your value-for-money reasoning and recommendation.
+5. Give a confidence score (out of 100) indicating how confident you are in this evaluation.
+6. End with a final recommendation formatted exactly like:
 Final Recommendation: BUY (Score: 4/5 – Good Value)
 Confidence Score: 86/100
 """
+
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
