@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Value for Money Checker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * {
       box-sizing: border-box;
@@ -13,21 +14,37 @@
       background: #f4f6f8;
       color: #333;
       margin: 0;
-      padding: 40px 20px;
+      padding: 0;
+    }
+
+    .header {
+      background-color: #0052cc;
+      padding: 20px;
+      text-align: center;
+      color: white;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
     }
 
     .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .card {
       background: white;
       padding: 40px;
       border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      max-width: 700px;
-      margin: auto;
     }
 
     h2 {
       text-align: center;
-      font-size: 24px;
+      font-size: 22px;
       margin-top: 0;
     }
 
@@ -52,16 +69,46 @@
       width: 100%;
       background-color: #0052cc;
       color: white;
-      padding: 12px;
+      padding: 14px;
       font-size: 16px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
       background-color: #003d99;
+    }
+
+    .loader {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .loader span {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin: 0 3px;
+      background: #0052cc;
+      border-radius: 50%;
+      animation: bounce 0.6s infinite alternate;
+    }
+
+    .loader span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .loader span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+      to {
+        transform: translateY(-10px);
+      }
     }
 
     .result {
@@ -70,6 +117,14 @@
       padding: 25px;
       border-left: 4px solid #0052cc;
       border-radius: 8px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
 
     .result p {
@@ -103,47 +158,70 @@
       color: #b71c1c;
       border: 1px solid #e57373;
     }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 24px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Perceived Value for Money (India)</h2>
-    <form method="POST">
-      <label for="product">Product Name</label>
-      <input type="text" name="product" id="product" required>
 
-      <label for="price">Price (INR)</label>
-      <input type="number" name="price" id="price" required>
-
-      <button type="submit">Check Value</button>
-    </form>
-
-    {% if result %}
-      <div class="result">
-        <strong>Analysis:</strong>
-        {% set lines = result.splitlines() %}
-        {% for line in lines %}
-          {% if "Final Recommendation:" not in line and line.strip() != "" %}
-            <p>{{ line }}</p>
-          {% endif %}
-        {% endfor %}
-
-        {% for line in lines %}
-          {% if "Final Recommendation:" in line %}
-            {% set verdict = line.lower() %}
-            {% if '5' in verdict or 'excellent' in verdict %}
-              <div class="recommendation good">{{ line }}</div>
-            {% elif '4' in verdict or 'good' in verdict %}
-              <div class="recommendation good">{{ line }}</div>
-            {% elif '3' in verdict or 'average' in verdict %}
-              <div class="recommendation average">{{ line }}</div>
-            {% else %}
-              <div class="recommendation poor">{{ line }}</div>
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-      </div>
-    {% endif %}
+  <div class="header">
+    <h1>Value for Money Checker</h1>
   </div>
+
+  <div class="container">
+    <div class="card">
+      <form method="POST" onsubmit="showLoader()">
+        <h2>Perceived Value for Money (India)</h2>
+        <label for="product">Product Name</label>
+        <input type="text" name="product" id="product" required>
+
+        <label for="price">Price (INR)</label>
+        <input type="number" name="price" id="price" required>
+
+        <button type="submit">Check Value</button>
+
+        <div class="loader" id="loader">
+          <span></span><span></span><span></span>
+        </div>
+      </form>
+
+      {% if result %}
+        <div class="result">
+          <strong>Analysis:</strong>
+          {% set lines = result.splitlines() %}
+          {% for line in lines %}
+            {% if "Final Recommendation:" not in line and line.strip() != "" %}
+              <p>{{ line }}</p>
+            {% endif %}
+          {% endfor %}
+
+          {% for line in lines %}
+            {% if "Final Recommendation:" in line %}
+              {% set verdict = line.lower() %}
+              {% if '5' in verdict or 'excellent' in verdict %}
+                <div class="recommendation good">{{ line }}</div>
+              {% elif '4' in verdict or 'good' in verdict %}
+                <div class="recommendation good">{{ line }}</div>
+              {% elif '3' in verdict or 'average' in verdict %}
+                <div class="recommendation average">{{ line }}</div>
+              {% else %}
+                <div class="recommendation poor">{{ line }}</div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    function showLoader() {
+      document.getElementById("loader").style.display = "block";
+    }
+  </script>
 </body>
 </html>
