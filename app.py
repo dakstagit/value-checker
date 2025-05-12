@@ -33,7 +33,7 @@ Please include:
 2. Estimated production cost
 3. Similar alternatives available in the selected market
 4. A confidence score (out of 100) indicating how confident you are in this evaluation
-5. A final value rating and recommendation
+5. A clear final verdict with a numeric score (1–5), value description, and recommendation.
 
 Format your last line like this exactly:
 Final Recommendation: BUY (Score: 4/5 – Good Value)
