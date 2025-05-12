@@ -159,18 +159,39 @@
   <div class="container">
     <div class="card">
       <form method="POST" onsubmit="showLoader()">
-        <label for="product">Product Name</label>
-        <input type="text" name="product" id="product" required>
+  <label for="product">Product Name</label>
+  <input type="text" name="product" id="product" required>
 
-        <label for="price">Price (INR)</label>
-        <input type="number" name="price" id="price" required>
+  <label for="price">Price (INR)</label>
+  <input type="number" name="price" id="price" required>
 
-        <button type="submit">Check Value</button>
+  <label for="category">Category</label>
+  <select name="category" id="category" required>
+    <option value="tech">Tech</option>
+    <option value="fashion">Fashion</option>
+    <option value="food">Food</option>
+    <option value="home appliances">Home Appliances</option>
+    <option value="beauty">Beauty</option>
+  </select>
 
-        <div class="loader" id="loader">
-          <span></span><span></span><span></span>
-        </div>
-      </form>
+  <label for="country">Market / Country</label>
+  <select name="country" id="country" required>
+    <option value="India">India</option>
+    <option value="United States">United States</option>
+    <option value="United Kingdom">United Kingdom</option>
+  </select>
+
+  <label for="user_score">Your Perceived Value (1–5)</label>
+  <input type="range" min="1" max="5" value="3" step="1" id="user_score" name="user_score" oninput="scoreLabel.innerText = this.value">
+  <p>User rating: <strong id="scoreLabel">3</strong>/5</p>
+
+  <button type="submit">Check Value</button>
+
+  <div class="loader" id="loader">
+    <span></span><span></span><span></span>
+  </div>
+</form>
+
 
       {% if result %}
         <div class="result" id="resultBlock">
