@@ -53,13 +53,18 @@
     }
 
     input[type="text"],
-    input[type="number"] {
+    input[type="number"],
+    select {
       width: 100%;
       padding: 12px;
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 16px;
       margin-top: 8px;
+    }
+
+    input[type="range"] {
+      width: 100%;
     }
 
     button {
@@ -144,6 +149,49 @@
       border: 1px solid #e57373;
     }
 
+    .confidence-score {
+      background-color: #e8f0fe;
+      border: 1px solid #90caf9;
+      color: #0d47a1;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .score-compare {
+      margin-top: 20px;
+      background: #f0f4f8;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .score-compare .bar {
+      height: 12px;
+      border-radius: 6px;
+      background-color: #ccc;
+      margin-top: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .score-compare .bar .fill {
+      height: 100%;
+      border-radius: 6px;
+    }
+
+    .score-compare .user .fill {
+      background-color: #4caf50;
+    }
+
+    .score-compare .gpt .fill {
+      background-color: #2196f3;
+    }
+
     @media (max-width: 600px) {
       .card { padding: 24px; }
     }
@@ -152,69 +200,90 @@
 <body>
 
   <div class="header">
-    <img src="http://www.digitaldevilsadvocate.com/wp-content/uploads/2016/10/Logo-3.png" alt="Logo">
+    <img src="https://via.placeholder.com/40x40.png?text=💡" alt="Logo">
     <h1>Value for Money Checker</h1>
   </div>
 
   <div class="container">
     <div class="card">
       <form method="POST" onsubmit="showLoader()">
-  <label for="product">Product Name</label>
-  <input type="text" name="product" id="product" required>
+        <label for="product">Product Name</label>
+        <input type="text" name="product" id="product" required>
 
-  <label for="price">Price (INR)</label>
-  <input type="number" name="price" id="price" required>
+        <label for="price">Price (INR)</label>
+        <input type="number" name="price" id="price" required>
 
-  <label for="category">Category</label>
-  <select name="category" id="category" required>
-    <option value="tech">Tech</option>
-    <option value="fashion">Fashion</option>
-    <option value="food">Food</option>
-    <option value="home appliances">Home Appliances</option>
-    <option value="beauty">Beauty</option>
-  </select>
+        <label for="category">Category</label>
+        <select name="category" id="category" required>
+          <option value="tech">Tech</option>
+          <option value="fashion">Fashion</option>
+          <option value="food">Food</option>
+          <option value="home appliances">Home Appliances</option>
+          <option value="beauty">Beauty</option>
+        </select>
 
-  <label for="country">Market / Country</label>
-  <select name="country" id="country" required>
-    <option value="India">India</option>
-    <option value="United States">United States</option>
-    <option value="United Kingdom">United Kingdom</option>
-  </select>
+        <label for="country">Market / Country</label>
+        <select name="country" id="country" required>
+          <option value="India">India</option>
+          <option value="United States">United States</option>
+          <option value="United Kingdom">United Kingdom</option>
+        </select>
 
-  <label for="user_score">Your Perceived Value (1–5)</label>
-  <input type="range" min="1" max="5" value="3" step="1" id="user_score" name="user_score" oninput="scoreLabel.innerText = this.value">
-  <p>User rating: <strong id="scoreLabel">3</strong>/5</p>
+        <label for="user_score">Your Perceived Value (1–5)</label>
+        <input type="range" min="1" max="5" value="3" step="1" id="user_score" name="user_score" oninput="scoreLabel.innerText = this.value">
+        <p>User rating: <strong id="scoreLabel">3</strong>/5</p>
 
-  <button type="submit">Check Value</button>
+        <button type="submit">Check Value</button>
 
-  <div class="loader" id="loader">
-    <span></span><span></span><span></span>
-  </div>
-</form>
-
+        <div class="loader" id="loader">
+          <span></span><span></span><span></span>
+        </div>
+      </form>
 
       {% if result %}
         <div class="result" id="resultBlock">
           <strong>Analysis:</strong>
           {% set lines = result.splitlines() %}
           {% for line in lines %}
-            {% if "Final Recommendation:" not in line and line.strip() != "" %}
+            {% if "Final Recommendation:" not in line and "Confidence Score:" not in line and line.strip() != "" %}
               <p>{{ line }}</p>
+            {% endif %}
+          {% endfor %}
+
+          {% for line in lines %}
+            {% if "Confidence Score:" in line %}
+              <div class="confidence-score">{{ line }}</div>
             {% endif %}
           {% endfor %}
 
           {% for line in lines %}
             {% if "Final Recommendation:" in line %}
               {% set verdict = line.lower() %}
-              {% if '5' in verdict or 'excellent' in verdict %}
-                <div class="recommendation good">{{ line }}</div>
-              {% elif '4' in verdict or 'good' in verdict %}
-                <div class="recommendation good">{{ line }}</div>
-              {% elif '3' in verdict or 'average' in verdict %}
-                <div class="recommendation average">{{ line }}</div>
-              {% else %}
-                <div class="recommendation poor">{{ line }}</div>
+              {% if '5/5' in verdict %}{% set gpt_score = 5 %}
+              {% elif '4/5' in verdict %}{% set gpt_score = 4 %}
+              {% elif '3/5' in verdict %}{% set gpt_score = 3 %}
+              {% elif '2/5' in verdict %}{% set gpt_score = 2 %}
+              {% elif '1/5' in verdict %}{% set gpt_score = 1 %}
               {% endif %}
+
+              <div class="recommendation 
+                {% if gpt_score == 5 or gpt_score == 4 %}good
+                {% elif gpt_score == 3 %}average
+                {% else %}poor{% endif %}">
+                {{ line }}
+              </div>
+
+              <div class="score-compare">
+                <p><strong>Your Rating:</strong> {{ request.form['user_score'] }}/5</p>
+                <div class="bar user">
+                  <div class="fill" style="width: {{ request.form['user_score'] | int * 20 }}%"></div>
+                </div>
+
+                <p><strong>GPT Rating:</strong> {{ gpt_score }}/5</p>
+                <div class="bar gpt">
+                  <div class="fill" style="width: {{ gpt_score * 20 }}%"></div>
+                </div>
+              </div>
             {% endif %}
           {% endfor %}
         </div>
@@ -235,8 +304,10 @@
         lines.forEach((line, i) => {
           setTimeout(() => {
             line.style.opacity = 1;
-          }, i * 150); // delay between each line
+          }, i * 150);
         });
+
+        block.scrollIntoView({ behavior: "smooth" });
       }
     });
   </script>
