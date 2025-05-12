@@ -5,13 +5,11 @@
   <title>Value for Money Checker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f4f6f8;
+      background-color: #f4f6f8;
       color: #333;
       margin: 0;
       padding: 0;
@@ -19,14 +17,20 @@
 
     .header {
       background-color: #0052cc;
-      padding: 20px;
-      text-align: center;
       color: white;
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+    }
+
+    .header img {
+      height: 40px;
+      margin-right: 15px;
     }
 
     .header h1 {
+      font-size: 22px;
       margin: 0;
-      font-size: 26px;
     }
 
     .container {
@@ -39,13 +43,7 @@
       background: white;
       padding: 40px;
       border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    }
-
-    h2 {
-      text-align: center;
-      font-size: 22px;
-      margin-top: 0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     }
 
     label {
@@ -97,18 +95,11 @@
       animation: bounce 0.6s infinite alternate;
     }
 
-    .loader span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .loader span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
+    .loader span:nth-child(2) { animation-delay: 0.2s; }
+    .loader span:nth-child(3) { animation-delay: 0.4s; }
 
     @keyframes bounce {
-      to {
-        transform: translateY(-10px);
-      }
+      to { transform: translateY(-10px); }
     }
 
     .result {
@@ -117,19 +108,13 @@
       padding: 25px;
       border-left: 4px solid #0052cc;
       border-radius: 8px;
-      opacity: 0;
-      animation: fadeIn 0.6s ease forwards;
-    }
-
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
+      display: none;
     }
 
     .result p {
       margin: 14px 0;
       line-height: 1.6;
+      opacity: 0;
     }
 
     .recommendation {
@@ -160,22 +145,20 @@
     }
 
     @media (max-width: 600px) {
-      .card {
-        padding: 24px;
-      }
+      .card { padding: 24px; }
     }
   </style>
 </head>
 <body>
 
   <div class="header">
+    <img src="https://via.placeholder.com/40x40.png?text=💡" alt="Logo">
     <h1>Value for Money Checker</h1>
   </div>
 
   <div class="container">
     <div class="card">
       <form method="POST" onsubmit="showLoader()">
-        <h2>Perceived Value for Money (India)</h2>
         <label for="product">Product Name</label>
         <input type="text" name="product" id="product" required>
 
@@ -190,7 +173,7 @@
       </form>
 
       {% if result %}
-        <div class="result">
+        <div class="result" id="resultBlock">
           <strong>Analysis:</strong>
           {% set lines = result.splitlines() %}
           {% for line in lines %}
@@ -222,6 +205,19 @@
     function showLoader() {
       document.getElementById("loader").style.display = "block";
     }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const block = document.getElementById("resultBlock");
+      if (block) {
+        block.style.display = 'block';
+        const lines = block.querySelectorAll('p');
+        lines.forEach((line, i) => {
+          setTimeout(() => {
+            line.style.opacity = 1;
+          }, i * 150); // delay between each line
+        });
+      }
+    });
   </script>
 </body>
 </html>
