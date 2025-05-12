@@ -15,29 +15,39 @@ def index():
     if request.method == 'POST':
         product = request.form['product']
         price = request.form['price']
-        prompt = f"""
-Evaluate if the following product is value for money in India.
+        category = request.form['category']
+        country = request.form['country']
+        user_score = request.form['user_score']
 
-Product: {product}
+        prompt = f"""
+Evaluate whether the following product is value for money in the selected market.
+
+Product Name: {product}
 Listed Price: ₹{price}
+Category: {category}
+Market: {country}
+User Perceived Rating: {user_score}/5
 
 Please include:
-1. Global average price (converted to INR)
+1. Global average price for this category (converted to {country}'s currency if needed)
 2. Estimated production cost
-3. Comparable alternatives in Indian market
-4. A clear final verdict with a numeric score (1–5), value description, and recommendation.
+3. Similar alternatives available in the selected market
+4. A confidence score (out of 100) indicating how confident you are in this evaluation
+5. A final value rating and recommendation
 
 Format your last line like this exactly:
 Final Recommendation: BUY (Score: 4/5 – Good Value)
+Confidence Score: 86/100
 """
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=500
+            max_tokens=600
         )
         result = response.choices[0].message.content
+
     return render_template('index.html', result=result)
 
 if __name__ == '__main__':
