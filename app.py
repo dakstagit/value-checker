@@ -26,7 +26,9 @@ Product Name: {product}
 Listed Price: ₹{price}
 Category: {category}
 Market: {country}
-User Perceived Rating: {user_score}/5
+The user has rated this product {user_score}/5 based on their perception.
+
+Please give your own independent rating based on data and your analysis only. Do NOT consider the user's rating while scoring.
 
 Please include:
 1. Global average price for this category (converted to {country}'s currency if needed)
