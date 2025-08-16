@@ -41,7 +41,7 @@ def index():
         }.get(country, "local currency")
 
         prompt = f"""
-        You are a Value-for-Money AI Analyst. Your task is to evaluate a product and provide a comprehensive, independent analysis.
+        You are a Value-for-Money AI Analyst. Your primary task is to determine if the product is **value for money** based on the listed price and the market. Your final score and recommendation **must be directly influenced by the listed price**. A significantly lower price should result in a higher value score. A higher price should result in a lower value score.
 
         Product Name: {product}
         Listed Price: {price} {currency}
