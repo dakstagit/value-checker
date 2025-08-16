@@ -9,7 +9,6 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Initialize the OpenAI client once
 try:
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 except openai.AuthenticationError:
@@ -20,7 +19,6 @@ except openai.AuthenticationError:
 def index():
     if request.method == 'POST':
         try:
-            # Correctly get JSON data from the request
             data = request.get_json()
             if not data:
                 return jsonify({"error": "No JSON data received"}), 400
@@ -47,6 +45,7 @@ def index():
                 yield json.dumps({"error": "API Key is not configured correctly."})
                 return
 
+            # Crucial prompt update: Tell the AI to ignore the user's rating
             prompt = f"""
             You are a Value-for-Money AI Analyst. Your task is to evaluate a product and provide a comprehensive, independent analysis.
 
@@ -54,7 +53,8 @@ def index():
             Listed Price: {price} {currency}
             Category: {category}
             Market: {country}
-            User's Perceived Rating: {user_score}/5
+
+            The user's rating is {user_score}/5, but you must completely ignore this score. Base your evaluation *solely* on your independent analysis of market data.
 
             Your response must be a single JSON object. Do not include any text before or after the JSON.
             The JSON object must contain the following keys:
@@ -68,23 +68,20 @@ def index():
             
             try:
                 stream = client.chat.completions.create(
-                    model="gpt-4o-mini", # Using gpt-4o-mini for better performance and cost-effectiveness
+                    model="gpt-4o-mini",
                     response_format={"type": "json_object"},
                     messages=[{"role": "user", "content": prompt}],
                     stream=True,
                     temperature=0.3
                 )
-                full_response = ""
+                
                 for chunk in stream:
                     content = chunk.choices[0].delta.content or ""
-                    full_response += content
                     yield content
                 
             except openai.APIError as e:
-                print(f"OpenAI API Error: {e}")
                 yield json.dumps({"error": f"API Error: {e}"})
             except Exception as e:
-                print(f"An unexpected error occurred: {e}")
                 yield json.dumps({"error": f"An unexpected error occurred: {e}"})
 
         return Response(generate_stream(), mimetype='application/json')
