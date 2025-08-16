@@ -19,12 +19,10 @@ except openai.AuthenticationError:
 def index():
     if request.method == 'POST':
         try:
-            # Correctly get JSON data from the request
             data = request.get_json()
             if not data:
                 return jsonify({"error": "No JSON data received"}), 400
 
-            # Correctly retrieve data from the JSON object
             product = data.get('product')
             price = data.get('price')
             category = data.get('category')
@@ -42,51 +40,41 @@ def index():
             "United Kingdom": "GBP"
         }.get(country, "local currency")
 
-        def generate_stream():
-            if not client:
-                yield json.dumps({"error": "API Key is not configured correctly."})
-                return
+        prompt = f"""
+        You are a Value-for-Money AI Analyst. Your task is to evaluate a product and provide a comprehensive, independent analysis.
 
-            prompt = f"""
-            You are a Value-for-Money AI Analyst. Your task is to evaluate a product and provide a comprehensive, independent analysis.
+        Product Name: {product}
+        Listed Price: {price} {currency}
+        Category: {category}
+        Market: {country}
 
-            Product Name: {product}
-            Listed Price: {price} {currency}
-            Category: {category}
-            Market: {country}
+        The user's rating is {user_score}/5, but you must completely ignore this score. Base your evaluation *solely* on your independent analysis of market data.
 
-            The user's rating is {user_score}/5, but you must completely ignore this score. Base your evaluation *solely* on your independent analysis of market data.
-
-            Your response must be a single JSON object. Do not include any text before or after the JSON.
-            The JSON object must contain the following keys:
-            "global_avg_price": A string with the global average price for this category, converted to {currency}.
-            "production_cost": A string with the estimated production cost, in {currency}.
-            "alternatives": A string with similar alternatives available in the selected market.
-            "summary": A short, one-paragraph summary of your value-for-money reasoning and recommendation.
-            "final_recommendation": A string formatted exactly like: 'BUY (Score: 4/5 – Good Value)'.
-            "confidence_score": An integer representing your confidence in this analysis (1-100).
-            """
+        Your response must be a single JSON object. Do not include any text before or after the JSON.
+        The JSON object must contain the following keys:
+        "global_avg_price": A string with the global average price for this category, converted to {currency}.
+        "production_cost": A string with the estimated production cost, in {currency}.
+        "alternatives": A string with similar alternatives available in the selected market.
+        "summary": A short, one-paragraph summary of your value-for-money reasoning and recommendation.
+        "final_recommendation": A string formatted exactly like: 'VERDICT (Score: X/5 – Description)'. The VERDICT must be 'BUY' if your score is 4 or 5. It must be 'HOLD' if your score is 3. It must be 'AVOID' if your score is 1 or 2.
+        "confidence_score": An integer representing your confidence in this analysis (1-100).
+        """
+        
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                response_format={"type": "json_object"},
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3
+            )
             
-            try:
-                stream = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    response_format={"type": "json_object"},
-                    messages=[{"role": "user", "content": prompt}],
-                    stream=True,
-                    temperature=0.3
-                )
-                
-                for chunk in stream:
-                    content = chunk.choices[0].delta.content or ""
-                    yield content
-                
-            except openai.APIError as e:
-                yield json.dumps({"error": f"API Error: {e}"})
-            except Exception as e:
-                yield json.dumps({"error": f"An unexpected error occurred: {e}"})
+            return jsonify(json.loads(response.choices[0].message.content))
+            
+        except openai.APIError as e:
+            return jsonify({"error": f"API Error: {e}"}), 500
+        except Exception as e:
+            return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
 
-        return Response(generate_stream(), mimetype='application/json')
-    
     return render_template('index.html', result=None)
 
 if __name__ == '__main__':
