@@ -1,333 +1,254 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="emerald">
 <head>
-  <meta charset="UTF-8">
-  <title>Value for Money Checker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f8;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-
-    .header {
-      background-color: #0052cc;
-      color: white;
-      display: flex;
-      align-items: center;
-      padding: 15px 20px;
-    }
-
-    .header img {
-      height: 40px;
-      margin-right: 15px;
-    }
-
-    .header h1 {
-      font-size: 22px;
-      margin: 0;
-    }
-
-    .container {
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-
-    .card {
-      background: white;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    }
-
-    label {
-      display: block;
-      margin-top: 20px;
-      font-weight: 600;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-      margin-top: 8px;
-    }
-
-    input[type="range"] {
-      width: 100%;
-    }
-
-    button {
-      margin-top: 30px;
-      width: 100%;
-      background-color: #0052cc;
-      color: white;
-      padding: 14px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #003d99;
-    }
-
-    .loader {
-      display: none;
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .loader span {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      margin: 0 3px;
-      background: #0052cc;
-      border-radius: 50%;
-      animation: bounce 0.6s infinite alternate;
-    }
-
-    .loader span:nth-child(2) { animation-delay: 0.2s; }
-    .loader span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes bounce {
-      to { transform: translateY(-10px); }
-    }
-
-    .result {
-      margin-top: 40px;
-      background: #f9f9f9;
-      padding: 25px;
-      border-left: 4px solid #0052cc;
-      border-radius: 8px;
-      display: none;
-    }
-
-    .result p {
-      margin: 14px 0;
-      line-height: 1.6;
-      opacity: 0;
-    }
-
-    .recommendation {
-      margin-top: 30px;
-      padding: 20px;
-      border-radius: 8px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 18px;
-    }
-
-    .recommendation.good {
-      background-color: #e6f4ea;
-      color: #1b5e20;
-      border: 1px solid #81c784;
-    }
-
-    .recommendation.average {
-      background-color: #fff8e1;
-      color: #bf360c;
-      border: 1px solid #ffb74d;
-    }
-
-    .recommendation.poor {
-      background-color: #ffebee;
-      color: #b71c1c;
-      border: 1px solid #e57373;
-    }
-
-    .confidence-score {
-      background-color: #e8f0fe;
-      border: 1px solid #90caf9;
-      color: #0d47a1;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: bold;
-      margin-top: 20px;
-      text-align: center;
-      font-size: 16px;
-    }
-
-    .score-compare {
-      margin-top: 20px;
-      background: #f0f4f8;
-      padding: 16px;
-      border-radius: 8px;
-      font-size: 16px;
-      line-height: 1.5;
-    }
-
-    .score-compare .bar {
-      height: 12px;
-      border-radius: 6px;
-      background-color: #ccc;
-      margin-top: 4px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .score-compare .bar .fill {
-      height: 100%;
-      border-radius: 6px;
-    }
-
-    .score-compare .user .fill {
-      background-color: #4caf50;
-    }
-
-    .score-compare .gpt .fill {
-      background-color: #2196f3;
-    }
-
-    @media (max-width: 600px) {
-      .card { padding: 24px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Value for Money Checker</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loader-dots {
+            @apply flex justify-center items-center space-x-2 mt-4;
+        }
+        .loader-dot {
+            @apply h-2 w-2 bg-blue-500 rounded-full animate-bounce;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
 
-  <div class="header">
-    <img src="http://www.digitaldevilsadvocate.com/wp-content/uploads/2016/10/Logo-3.png" alt="Logo">
-    <h1>Value for Money Checker</h1>
-  </div>
-
-  <div class="container">
-    <div class="card">
-      <form method="POST" onsubmit="showLoader()">
-        <label for="country">Market / Country</label>
-        <select name="country" id="country" required>
-          <option value="India">India</option>
-          <option value="United States">United States</option>
-          <option value="United Kingdom">United Kingdom</option>
-        </select>
-
-        <label for="category">Category</label>
-        <select name="category" id="category" required>
-          <option value="tech">Tech</option>
-          <option value="fashion">Fashion</option>
-          <option value="food">Food</option>
-          <option value="home appliances">Home Appliances</option>
-          <option value="beauty">Beauty</option>
-        </select>
-
-        <label for="product">Product Name</label>
-        <input type="text" name="product" id="product" required>
-
-        <label for="price" id="priceLabel">Price (INR)</label>
-        <input type="number" name="price" id="price" required>
-
-        <label for="user_score">Your Perceived Value (1–5)</label>
-        <input type="range" min="1" max="5" value="3" step="1" id="user_score" name="user_score" oninput="scoreLabel.innerText = this.value">
-        <p>User rating: <strong id="scoreLabel">3</strong>/5</p>
-
-        <button type="submit">Check Value</button>
-
-        <div class="loader" id="loader">
-          <span></span><span></span><span></span>
-        </div>
-      </form>
-
-      {% if result %}
-        <div class="result" id="resultBlock">
-          <strong>Analysis:</strong>
-          {% set lines = result.splitlines() %}
-          {% for line in lines %}
-  {% if not line.startswith("Final Recommendation:") and not line.startswith("Confidence Score:") and line.strip() != "" %}
-    <p>{{ line }}</p>
-  {% endif %}
-{% endfor %}
-
-
-          {% for line in lines %}
-            {% if "Confidence Score:" in line %}
-              <div class="confidence-score">{{ line }}</div>
-            {% endif %}
-          {% endfor %}
-
-          {% for line in lines %}
-            {% if "Final Recommendation:" in line %}
-              {% set verdict = line.lower() %}
-              {% if '5/5' in verdict %}{% set gpt_score = 5 %}
-              {% elif '4/5' in verdict %}{% set gpt_score = 4 %}
-              {% elif '3/5' in verdict %}{% set gpt_score = 3 %}
-              {% elif '2/5' in verdict %}{% set gpt_score = 2 %}
-              {% elif '1/5' in verdict %}{% set gpt_score = 1 %}
-              {% endif %}
-
-              <div class="recommendation 
-                {% if gpt_score == 5 or gpt_score == 4 %}good
-                {% elif gpt_score == 3 %}average
-                {% else %}poor{% endif %}">
-                {{ line }}
-              </div>
-
-              <div class="score-compare">
-                <p><strong>Your Rating:</strong> {{ request.form['user_score'] }}/5</p>
-                <div class="bar user">
-                  <div class="fill" style="width: {{ request.form['user_score'] | int * 20 }}%"></div>
-                </div>
-
-                <p><strong>GPT Rating:</strong> {{ gpt_score }}/5</p>
-                <div class="bar gpt">
-                  <div class="fill" style="width: {{ gpt_score * 20 }}%"></div>
-                </div>
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
-      {% endif %}
+<div class="navbar bg-primary text-primary-content shadow-lg px-4 md:px-8">
+    <div class="flex-1">
+        <a class="btn btn-ghost normal-case text-xl font-bold">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+            <span class="ml-2 hidden sm:block">Value for Money Checker</span>
+        </a>
     </div>
-  </div>
+</div>
 
-  <script>
-    function showLoader() {
-      document.getElementById("loader").style.display = "block";
-    }
+<div class="container mx-auto px-4 py-8 md:py-16">
+    <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto">
+        <div class="card-body">
+            <h2 class="card-title text-2xl font-bold mb-4">Product Evaluation</h2>
+            <form id="vfm-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Market / Country</span></label>
+                        <select id="country" name="country" class="select select-bordered" required>
+                            <option value="India">India</option>
+                            <option value="United States">United States</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Category</span></label>
+                        <select id="category" name="category" class="select select-bordered" required>
+                            <option value="tech">Tech</option>
+                            <option value="fashion">Fashion</option>
+                            <option value="food">Food</option>
+                            <option value="home appliances">Home Appliances</option>
+                            <option value="beauty">Beauty</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-control mt-4">
+                    <label class="label"><span class="label-text">Product Name</span></label>
+                    <input type="text" id="product" name="product" placeholder="e.g. 'Sony WH-1000XM5 headphones'" class="input input-bordered" required>
+                </div>
+                <div class="form-control mt-4">
+                    <label class="label"><span class="label-text" id="price-label">Price (INR)</span></label>
+                    <input type="number" id="price" name="price" placeholder="e.g. 24990" class="input input-bordered" required>
+                </div>
+                <div class="form-control mt-4">
+                    <label class="label"><span class="label-text">Your Perceived Value (1-5): <strong id="score-label">3</strong></span></label>
+                    <input type="range" id="user-score" name="user_score" min="1" max="5" value="3" step="1" class="range range-primary" required>
+                </div>
+                <div class="card-actions justify-end mt-6">
+                    <button type="submit" class="btn btn-primary w-full" id="submit-btn">Check Value</button>
+                </div>
+            </form>
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const block = document.getElementById("resultBlock");
-      if (block) {
-        block.style.display = 'block';
-        const lines = block.querySelectorAll('p');
-        lines.forEach((line, i) => {
-          setTimeout(() => {
-            line.style.opacity = 1;
-          }, i * 150);
+            <div id="loader" class="loader-dots hidden">
+                <div class="loader-dot animate-[bounce_0.6s_infinite_alternate]"></div>
+                <div class="loader-dot animate-[bounce_0.6s_infinite_alternate_0.2s]"></div>
+                <div class="loader-dot animate-[bounce_0.6s_infinite_alternate_0.4s]"></div>
+            </div>
+
+            <div id="result-container" class="mt-8 space-y-4 hidden">
+                <div id="analysis-card" class="card bg-base-200 shadow-md">
+                    <div class="card-body">
+                        <h3 class="card-title text-lg font-semibold">AI Analysis</h3>
+                        <p id="analysis-summary"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="stat bg-base-200 rounded-box shadow-md">
+                        <div class="stat-title">Global Avg. Price</div>
+                        <div id="global-price" class="stat-value text-primary text-xl"></div>
+                    </div>
+                    <div class="stat bg-base-200 rounded-box shadow-md">
+                        <div class="stat-title">Est. Production Cost</div>
+                        <div id="production-cost" class="stat-value text-secondary text-xl"></div>
+                    </div>
+                </div>
+
+                <div class="card bg-base-200 shadow-md">
+                    <div class="card-body">
+                        <h4 class="card-title text-lg">Alternatives</h4>
+                        <p id="alternatives-list"></p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div id="final-recommendation-card" class="card bg-base-200 shadow-md flex-1">
+                        <div class="card-body flex-row justify-between items-center">
+                            <h4 class="card-title text-lg" id="final-recommendation-text"></h4>
+                            <div class="badge badge-lg" id="recommendation-badge"></div>
+                        </div>
+                    </div>
+                    <div id="confidence-score-card" class="card bg-base-200 shadow-md flex-1">
+                        <div class="card-body flex-row justify-between items-center">
+                            <h4 class="card-title text-lg">Confidence Score</h4>
+                            <div id="confidence-score" class="badge badge-lg badge-accent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-inner">
+                    <div class="mb-4">
+                        <p class="font-bold">Your Rating: <span id="user-rating-text"></span></p>
+                        <progress class="progress progress-success w-full" id="user-rating-bar" value="0" max="5"></progress>
+                    </div>
+                    <div>
+                        <p class="font-bold">AI Rating: <span id="ai-rating-text"></span></p>
+                        <progress class="progress progress-info w-full" id="ai-rating-bar" value="0" max="5"></progress>
+                    </div>
+                </div>
+                
+                <div class="card-actions justify-end mt-6">
+                    <button class="btn btn-neutral w-full" onclick="window.location.reload();">Check Another Product</button>
+                </div>
+            </div>
+
+            <div id="error-alert" role="alert" class="alert alert-error hidden mt-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span id="error-message"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('vfm-form');
+        const loader = document.getElementById('loader');
+        const resultContainer = document.getElementById('result-container');
+        const errorAlert = document.getElementById('error-alert');
+        const errorMessage = document.getElementById('error-message');
+        const userScoreInput = document.getElementById('user-score');
+        const scoreLabel = document.getElementById('score-label');
+        const countrySelect = document.getElementById('country');
+        const priceLabel = document.getElementById('price-label');
+
+        userScoreInput.addEventListener('input', () => {
+            scoreLabel.textContent = userScoreInput.value;
         });
-        block.scrollIntoView({ behavior: "smooth" });
-      }
 
-      // Dynamic currency label
-      const countrySelector = document.getElementById("country");
-      const priceLabel = document.getElementById("priceLabel");
+        countrySelect.addEventListener('change', () => {
+            const currencyMap = { "India": "INR", "United States": "USD", "United Kingdom": "GBP" };
+            priceLabel.textContent = `Price (${currencyMap[countrySelect.value] || 'Currency'})`;
+        });
 
-      function updateCurrencyLabel() {
-        const country = countrySelector.value;
-        const currency = {
-          "India": "INR",
-          "United States": "USD",
-          "United Kingdom": "GBP"
-        }[country] || "Currency";
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loader.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            errorAlert.classList.add('hidden');
 
-        priceLabel.innerText = `Price (${currency})`;
-      }
+            const formData = new FormData(form);
+            let rawData = {};
+            for (let pair of formData.entries()) {
+                rawData[pair[0]] = pair[1];
+            }
 
-      countrySelector.addEventListener("change", updateCurrencyLabel);
-      updateCurrencyLabel(); // Initial call
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rawData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned status code ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let result = '';
+
+                // This part handles the streaming
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    result += decoder.decode(value, { stream: true });
+                }
+
+                const finalData = JSON.parse(result);
+                if (finalData.error) {
+                    throw new Error(finalData.error);
+                }
+                
+                displayResults(finalData, userScoreInput.value);
+
+            } catch (error) {
+                console.error("Fetch error:", error);
+                errorMessage.textContent = error.message;
+                errorAlert.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+            }
+        });
+
+        function displayResults(data, userScore) {
+            const { 
+                global_avg_price, production_cost, alternatives, 
+                summary, final_recommendation, confidence_score 
+            } = data;
+
+            // Extract AI score from the final recommendation string
+            const aiScoreMatch = final_recommendation.match(/\(Score: (\d)\/5/);
+            const aiScore = aiScoreMatch ? parseInt(aiScoreMatch[1]) : 0;
+
+            document.getElementById('analysis-summary').textContent = summary;
+            document.getElementById('global-price').textContent = global_avg_price;
+            document.getElementById('production-cost').textContent = production_cost;
+            document.getElementById('alternatives-list').textContent = alternatives;
+
+            document.getElementById('final-recommendation-text').textContent = final_recommendation;
+            
+            const badge = document.getElementById('recommendation-badge');
+            badge.textContent = final_recommendation.split('(')[0].trim();
+            if (aiScore >= 4) { badge.className = 'badge badge-lg badge-success'; }
+            else if (aiScore === 3) { badge.className = 'badge badge-lg badge-warning'; }
+            else { badge.className = 'badge badge-lg badge-error'; }
+
+            document.getElementById('confidence-score').textContent = `${confidence_score}/100`;
+
+            // Score comparison bars
+            document.getElementById('user-rating-text').textContent = `${userScore}/5`;
+            document.getElementById('user-rating-bar').value = userScore;
+            
+            document.getElementById('ai-rating-text').textContent = `${aiScore}/5`;
+            document.getElementById('ai-rating-bar').value = aiScore;
+
+            resultContainer.classList.remove('hidden');
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
     });
-  </script>
+</script>
+
 </body>
 </html>
