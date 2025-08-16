@@ -13,6 +13,10 @@
         .loader-dot {
             @apply h-2 w-2 bg-blue-500 rounded-full animate-bounce;
         }
+        /* Fix text color for dark backgrounds */
+        [data-theme="dark"] .text-black, [data-theme="dark"] .score-compare p, [data-theme="dark"] .score-compare strong {
+            color: #ffffff;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
@@ -54,12 +58,8 @@
                     </div>
                 </div>
                 <div class="form-control mt-4">
-                    <label class="label"><span class="label-text">Product Name</span></label>
-                    <input type="text" id="product" name="product" placeholder="e.g. 'Sony WH-1000XM5 headphones'" class="input input-bordered" required>
-                </div>
-                <div class="form-control mt-4">
                     <label class="label"><span class="label-text" id="price-label">Price (INR)</span></label>
-                    <input type="number" id="price" name="price" placeholder="e.g. 24990" class="input input-bordered" required>
+                    <input type="number" id="price" name="price" placeholder="e.g. '24990'" class="input input-bordered" required>
                 </div>
                 <div class="form-control mt-4">
                     <label class="label"><span class="label-text">Your Perceived Value (1-5): <strong id="score-label">3</strong></span></label>
@@ -117,7 +117,7 @@
                     </div>
                 </div>
 
-                <div class="mt-6 p-4 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-inner">
+                <div class="mt-6 p-4 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-inner text-black dark:text-white">
                     <div class="mb-4">
                         <p class="font-bold">Your Rating: <span id="user-rating-text"></span></p>
                         <progress class="progress progress-success w-full" id="user-rating-bar" value="0" max="5"></progress>
@@ -187,21 +187,31 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                let result = '';
+                let fullResponse = '';
+                let jsonState = '';
+                let resultData = null;
 
                 // This part handles the streaming
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    result += decoder.decode(value, { stream: true });
-                }
 
-                const finalData = JSON.parse(result);
-                if (finalData.error) {
-                    throw new Error(finalData.error);
+                    const chunk = decoder.decode(value, { stream: true });
+                    jsonState += chunk;
+
+                    // Attempt to parse the partial JSON
+                    try {
+                        resultData = JSON.parse(jsonState);
+                        // If parsing succeeds, update the UI
+                        updateUI(resultData, rawData.user_score);
+                    } catch (e) {
+                        // If JSON is incomplete, continue to the next chunk
+                    }
                 }
                 
-                displayResults(finalData, userScoreInput.value);
+                if (resultData && resultData.error) {
+                    throw new Error(resultData.error);
+                }
 
             } catch (error) {
                 console.error("Fetch error:", error);
@@ -212,41 +222,46 @@
             }
         });
 
-        function displayResults(data, userScore) {
+        function updateUI(data, userScore) {
             const { 
                 global_avg_price, production_cost, alternatives, 
                 summary, final_recommendation, confidence_score 
             } = data;
 
             // Extract AI score from the final recommendation string
-            const aiScoreMatch = final_recommendation.match(/\(Score: (\d)\/5/);
-            const aiScore = aiScoreMatch ? parseInt(aiScoreMatch[1]) : 0;
+            const aiScoreMatch = final_recommendation ? final_recommendation.match(/\(Score: (\d)\/5/) : null;
+            const aiScore = aiScoreMatch ? parseInt(aiScoreMatch[1]) : null;
 
-            document.getElementById('analysis-summary').textContent = summary;
-            document.getElementById('global-price').textContent = global_avg_price;
-            document.getElementById('production-cost').textContent = production_cost;
-            document.getElementById('alternatives-list').textContent = alternatives;
+            document.getElementById('analysis-summary').textContent = summary || '';
+            document.getElementById('global-price').textContent = global_avg_price || '';
+            document.getElementById('production-cost').textContent = production_cost || '';
+            document.getElementById('alternatives-list').textContent = alternatives || '';
 
-            document.getElementById('final-recommendation-text').textContent = final_recommendation;
-            
-            const badge = document.getElementById('recommendation-badge');
-            badge.textContent = final_recommendation.split('(')[0].trim();
-            if (aiScore >= 4) { badge.className = 'badge badge-lg badge-success'; }
-            else if (aiScore === 3) { badge.className = 'badge badge-lg badge-warning'; }
-            else { badge.className = 'badge badge-lg badge-error'; }
+            if (final_recommendation) {
+                document.getElementById('final-recommendation-text').textContent = final_recommendation;
+                const badge = document.getElementById('recommendation-badge');
+                badge.textContent = final_recommendation.split('(')[0].trim();
+                if (aiScore >= 4) { badge.className = 'badge badge-lg badge-success'; }
+                else if (aiScore === 3) { badge.className = 'badge badge-lg badge-warning'; }
+                else { badge.className = 'badge badge-lg badge-error'; }
+            }
 
-            document.getElementById('confidence-score').textContent = `${confidence_score}/100`;
+            if (confidence_score) {
+                document.getElementById('confidence-score').textContent = `${confidence_score}/100`;
+            }
 
             // Score comparison bars
             document.getElementById('user-rating-text').textContent = `${userScore}/5`;
             document.getElementById('user-rating-bar').value = userScore;
             
-            document.getElementById('ai-rating-text').textContent = `${aiScore}/5`;
-            document.getElementById('ai-rating-bar').value = aiScore;
+            if (aiScore) {
+                document.getElementById('ai-rating-text').textContent = `${aiScore}/5`;
+                document.getElementById('ai-rating-bar').value = aiScore;
+            }
 
             resultContainer.classList.remove('hidden');
-            resultContainer.scrollIntoView({ behavior: 'smooth' });
         }
+
     });
 </script>
 
