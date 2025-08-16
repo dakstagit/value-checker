@@ -19,10 +19,12 @@ except openai.AuthenticationError:
 def index():
     if request.method == 'POST':
         try:
+            # Correctly get JSON data from the request
             data = request.get_json()
             if not data:
                 return jsonify({"error": "No JSON data received"}), 400
 
+            # Correctly retrieve data from the JSON object
             product = data.get('product')
             price = data.get('price')
             category = data.get('category')
@@ -32,7 +34,7 @@ def index():
             return jsonify({"error": f"Invalid JSON format: {e}"}), 400
 
         if not all([product, price, category, country, user_score]):
-            return jsonify({"error": "Missing form data"}), 400
+            return jsonify({"error": "Missing form data. Please fill all fields."}), 400
 
         currency = {
             "India": "INR",
@@ -45,7 +47,6 @@ def index():
                 yield json.dumps({"error": "API Key is not configured correctly."})
                 return
 
-            # Crucial prompt update: Tell the AI to ignore the user's rating
             prompt = f"""
             You are a Value-for-Money AI Analyst. Your task is to evaluate a product and provide a comprehensive, independent analysis.
 
