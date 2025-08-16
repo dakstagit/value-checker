@@ -19,11 +19,19 @@ except openai.AuthenticationError:
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        product = request.form.get('product')
-        price = request.form.get('price')
-        category = request.form.get('category')
-        country = request.form.get('country')
-        user_score = request.form.get('user_score')
+        try:
+            # Correctly get JSON data from the request
+            data = request.get_json()
+            if not data:
+                return jsonify({"error": "No JSON data received"}), 400
+
+            product = data.get('product')
+            price = data.get('price')
+            category = data.get('category')
+            country = data.get('country')
+            user_score = data.get('user_score')
+        except Exception as e:
+            return jsonify({"error": f"Invalid JSON format: {e}"}), 400
 
         if not all([product, price, category, country, user_score]):
             return jsonify({"error": "Missing form data"}), 400
