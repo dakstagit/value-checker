@@ -17,6 +17,11 @@
         [data-theme="dark"] .text-black, [data-theme="dark"] .score-compare p, [data-theme="dark"] .score-compare strong {
             color: #ffffff;
         }
+        .result-item {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
@@ -81,7 +86,7 @@
             </div>
 
             <div id="result-container" class="mt-8 space-y-4 hidden">
-                <div id="analysis-card" class="card bg-base-200 shadow-md">
+                <div id="analysis-card" class="card bg-base-200 shadow-md result-item">
                     <div class="card-body">
                         <h3 class="card-title text-lg font-semibold">AI Analysis</h3>
                         <p id="analysis-summary"></p>
@@ -89,24 +94,24 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="stat bg-base-200 rounded-box shadow-md">
+                    <div class="stat bg-base-200 rounded-box shadow-md result-item">
                         <div class="stat-title">Global Avg. Price</div>
                         <div id="global-price" class="stat-value text-primary text-xl"></div>
                     </div>
-                    <div class="stat bg-base-200 rounded-box shadow-md">
+                    <div class="stat bg-base-200 rounded-box shadow-md result-item">
                         <div class="stat-title">Est. Production Cost</div>
                         <div id="production-cost" class="stat-value text-secondary text-xl"></div>
                     </div>
                 </div>
 
-                <div class="card bg-base-200 shadow-md">
+                <div class="card bg-base-200 shadow-md result-item">
                     <div class="card-body">
                         <h4 class="card-title text-lg">Alternatives</h4>
                         <p id="alternatives-list"></p>
                     </div>
                 </div>
 
-                <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex flex-col md:flex-row gap-4 result-item">
                     <div id="final-recommendation-card" class="card bg-base-200 shadow-md flex-1">
                         <div class="card-body flex-row justify-between items-center">
                             <h4 class="card-title text-lg" id="final-recommendation-text"></h4>
@@ -121,7 +126,7 @@
                     </div>
                 </div>
 
-                <div class="mt-6 p-4 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-inner text-black dark:text-white">
+                <div class="mt-6 p-4 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-inner text-black dark:text-white result-item">
                     <div class="mb-4">
                         <p class="font-bold">Your Rating: <span id="user-rating-text"></span></p>
                         <progress class="progress progress-success w-full" id="user-rating-bar" value="0" max="5"></progress>
@@ -132,7 +137,7 @@
                     </div>
                 </div>
                 
-                <div class="card-actions justify-end mt-6">
+                <div class="card-actions justify-end mt-6 result-item">
                     <button class="btn btn-neutral w-full" onclick="window.location.reload();">Check Another Product</button>
                 </div>
             </div>
@@ -189,33 +194,13 @@
                     throw new Error(`Server returned status code ${response.status}`);
                 }
 
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let fullResponse = '';
-                let jsonState = '';
-                let resultData = null;
-
-                // This part handles the streaming
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    jsonState += chunk;
-
-                    // Attempt to parse the partial JSON
-                    try {
-                        resultData = JSON.parse(jsonState);
-                        // If parsing succeeds, update the UI
-                        updateUI(resultData, rawData.user_score);
-                    } catch (e) {
-                        // If JSON is incomplete, continue to the next chunk
-                    }
-                }
+                const resultData = await response.json();
                 
-                if (resultData && resultData.error) {
+                if (resultData.error) {
                     throw new Error(resultData.error);
                 }
+
+                displayResults(resultData, rawData.user_score);
 
             } catch (error) {
                 console.error("Fetch error:", error);
@@ -226,13 +211,12 @@
             }
         });
 
-        function updateUI(data, userScore) {
+        function displayResults(data, userScore) {
             const { 
                 global_avg_price, production_cost, alternatives, 
                 summary, final_recommendation, confidence_score 
             } = data;
 
-            // Extract AI score from the final recommendation string
             const aiScoreMatch = final_recommendation ? final_recommendation.match(/\(Score: (\d)\/5/) : null;
             const aiScore = aiScoreMatch ? parseInt(aiScoreMatch[1]) : null;
 
@@ -244,9 +228,10 @@
             if (final_recommendation) {
                 document.getElementById('final-recommendation-text').textContent = final_recommendation;
                 const badge = document.getElementById('recommendation-badge');
-                badge.textContent = final_recommendation.split('(')[0].trim();
-                if (aiScore >= 4) { badge.className = 'badge badge-lg badge-success'; }
-                else if (aiScore === 3) { badge.className = 'badge badge-lg badge-warning'; }
+                const verdict = final_recommendation.split('(')[0].trim();
+                badge.textContent = verdict;
+                if (verdict === 'BUY') { badge.className = 'badge badge-lg badge-success'; }
+                else if (verdict === 'HOLD') { badge.className = 'badge badge-lg badge-warning'; }
                 else { badge.className = 'badge badge-lg badge-error'; }
             }
 
@@ -254,7 +239,6 @@
                 document.getElementById('confidence-score').textContent = `${confidence_score}/100`;
             }
 
-            // Score comparison bars
             document.getElementById('user-rating-text').textContent = `${userScore}/5`;
             document.getElementById('user-rating-bar').value = userScore;
             
@@ -264,8 +248,15 @@
             }
 
             resultContainer.classList.remove('hidden');
-        }
 
+            const resultItems = resultContainer.querySelectorAll('.result-item');
+            resultItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.opacity = 1;
+                    item.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }
     });
 </script>
 
